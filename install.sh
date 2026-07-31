@@ -17,6 +17,15 @@ sudo pacman -S --needed --noconfirm \
     curl
 
 #######################################
+# PATH
+#######################################
+
+grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.zprofile || \
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zprofile
+
+export PATH="$HOME/.local/bin:$PATH"
+
+#######################################
 # Install yay
 #######################################
 
@@ -24,13 +33,10 @@ if ! command -v yay >/dev/null 2>&1; then
     echo "==> Installing yay..."
 
     rm -rf /tmp/yay
-
     git clone https://aur.archlinux.org/yay.git /tmp/yay
 
     cd /tmp/yay
-
     makepkg -si --noconfirm
-
     cd "$REPO_DIR"
 
     rm -rf /tmp/yay
@@ -67,7 +73,6 @@ while read -r pkg; do
     yay -S --needed --noconfirm "$pkg"
 done < packages/aur.txt
 
-
 #######################################
 # Fonts
 #######################################
@@ -80,7 +85,6 @@ if [ -d "$REPO_DIR/fonts" ]; then
 
     fc-cache -fv
 fi
-
 
 #######################################
 # SDDM Astronaut Theme
@@ -103,7 +107,6 @@ if ! [ -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
 Current=sddm-astronaut-theme" | sudo tee /etc/sddm.conf >/dev/null
 fi
 
-
 #######################################
 # Oh My Zsh
 #######################################
@@ -115,9 +118,7 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-
 
 echo "==> Installing zsh plugins..."
 
@@ -127,13 +128,11 @@ if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
     "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 fi
 
-
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
     git clone \
     https://github.com/zsh-users/zsh-syntax-highlighting \
     "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 fi
-
 
 #######################################
 # Default shell
@@ -143,7 +142,6 @@ if [ "$SHELL" != "$(which zsh)" ]; then
     echo "==> Setting zsh as default shell..."
     chsh -s "$(which zsh)"
 fi
-
 
 #######################################
 # Dotfiles
@@ -163,7 +161,6 @@ for dir in */; do
     stow --restow "${dir%/}"
 done
 
-
 #######################################
 # Kitty
 #######################################
@@ -171,15 +168,13 @@ done
 echo "==> Configuring kitty..."
 
 mkdir -p ~/.config/kitty
+touch ~/.config/kitty/kitty.conf
 
-if [ ! -f ~/.config/kitty/kitty.conf ]; then
-    touch ~/.config/kitty/kitty.conf
-fi
+grep -q "^shell /usr/bin/zsh$" ~/.config/kitty/kitty.conf || \
+echo "shell /usr/bin/zsh" >> ~/.config/kitty/kitty.conf
 
-if ! grep -q "shell /usr/bin/zsh" ~/.config/kitty/kitty.conf; then
-    echo "shell /usr/bin/zsh" >> ~/.config/kitty/kitty.conf
-fi
-
+grep -q "^allow_remote_control yes$" ~/.config/kitty/kitty.conf || \
+echo "allow_remote_control yes" >> ~/.config/kitty/kitty.conf
 
 #######################################
 # Scripts
@@ -189,18 +184,29 @@ echo "==> Installing scripts..."
 
 chmod +x "$REPO_DIR"/bin/.local/bin/*
 
-
 #######################################
-# Set default wallpaper
+# Wallpaper
 #######################################
 
 if [ -f "$REPO_DIR/wallpapers/obito-wallpaper.png" ]; then
     echo "==> Setting default wallpaper..."
 
     "$REPO_DIR/bin/.local/bin/setwall" \
-    "$REPO_DIR/wallpapers/obito-wallpaper.png"
+        "$REPO_DIR/wallpapers/obito-wallpaper.png"
+
+    mkdir -p ~/.config/waybar
+
+    ln -sf \
+        ~/.cache/wal/colors-waybar.css \
+        ~/.config/waybar/colors.css
 fi
 
+#######################################
+# Enable services
+#######################################
+
+sudo systemctl enable NetworkManager.service || true
+sudo systemctl enable sddm.service || true
 
 #######################################
 # Done
@@ -211,9 +217,4 @@ echo "======================================="
 echo " Installation completed successfully!"
 echo "======================================="
 echo
-echo "Wallpaper:"
-echo "  obito-wallpaper.png"
-echo
-echo "Run:"
-echo "  logout/login"
-echo
+echo "Please reboot your system."
