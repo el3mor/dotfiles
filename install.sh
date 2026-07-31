@@ -12,7 +12,9 @@ sudo pacman -S --needed --noconfirm \
     git \
     base-devel \
     stow \
-    python-pipx
+    python-pipx \
+    zsh \
+    curl
 
 #######################################
 # Install yay
@@ -65,6 +67,7 @@ while read -r pkg; do
     yay -S --needed --noconfirm "$pkg"
 done < packages/aur.txt
 
+
 #######################################
 # Fonts
 #######################################
@@ -77,6 +80,7 @@ if [ -d "$REPO_DIR/fonts" ]; then
 
     fc-cache -fv
 fi
+
 
 #######################################
 # SDDM Astronaut Theme
@@ -99,6 +103,48 @@ if ! [ -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
 Current=sddm-astronaut-theme" | sudo tee /etc/sddm.conf >/dev/null
 fi
 
+
+#######################################
+# Oh My Zsh
+#######################################
+
+echo "==> Installing Oh My Zsh..."
+
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    RUNZSH=no CHSH=no \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+
+echo "==> Installing zsh plugins..."
+
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+    git clone \
+    https://github.com/zsh-users/zsh-autosuggestions \
+    "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+fi
+
+
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    git clone \
+    https://github.com/zsh-users/zsh-syntax-highlighting \
+    "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+fi
+
+
+#######################################
+# Default shell
+#######################################
+
+if [ "$SHELL" != "$(which zsh)" ]; then
+    echo "==> Setting zsh as default shell..."
+    chsh -s "$(which zsh)"
+fi
+
+
 #######################################
 # Dotfiles
 #######################################
@@ -117,11 +163,44 @@ for dir in */; do
     stow --restow "${dir%/}"
 done
 
+
+#######################################
+# Kitty
+#######################################
+
+echo "==> Configuring kitty..."
+
+mkdir -p ~/.config/kitty
+
+if [ ! -f ~/.config/kitty/kitty.conf ]; then
+    touch ~/.config/kitty/kitty.conf
+fi
+
+if ! grep -q "shell /usr/bin/zsh" ~/.config/kitty/kitty.conf; then
+    echo "shell /usr/bin/zsh" >> ~/.config/kitty/kitty.conf
+fi
+
+
 #######################################
 # Scripts
 #######################################
 
+echo "==> Installing scripts..."
+
 chmod +x "$REPO_DIR"/bin/.local/bin/*
+
+
+#######################################
+# Set default wallpaper
+#######################################
+
+if [ -f "$REPO_DIR/wallpapers/obito-wallpaper.png" ]; then
+    echo "==> Setting default wallpaper..."
+
+    "$REPO_DIR/bin/.local/bin/setwall" \
+    "$REPO_DIR/wallpapers/obito-wallpaper.png"
+fi
+
 
 #######################################
 # Done
@@ -132,10 +211,9 @@ echo "======================================="
 echo " Installation completed successfully!"
 echo "======================================="
 echo
-echo "Wallpapers:"
-echo "  $REPO_DIR/wallpapers"
+echo "Wallpaper:"
+echo "  obito-wallpaper.png"
 echo
 echo "Run:"
-echo "  setwall <wallpaper>"
+echo "  logout/login"
 echo
-echo "Then logout/login."
