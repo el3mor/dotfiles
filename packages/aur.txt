@@ -6,5 +6,4 @@ python-pywalfox
 walker-bin
 wlogout-git
 yay
-yay-debug
 zen-browser-bin
