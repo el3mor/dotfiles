@@ -1,0 +1,4 @@
+[[mgr.prepend_keymap]]
+on = ["w"]
+run = "shell 'setwall \"$1\"' --confirm"
+desc = "Set as wallpaper"

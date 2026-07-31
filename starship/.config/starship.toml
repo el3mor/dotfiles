@@ -1,0 +1,44 @@
+add_newline = true
+
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$fill\
+$cmd_duration\
+$line_break\
+$character
+"""
+
+[username]
+show_always = false
+
+[hostname]
+ssh_only = true
+
+[directory]
+style = "bold #89b4fa"
+truncation_length = 3
+truncate_to_repo = true
+
+[git_branch]
+symbol = " "
+style = "bold #cba6f7"
+
+[git_status]
+style = "bold #f38ba8"
+
+[cmd_duration]
+min_time = 500
+format = "[󰔛 $duration]($style)"
+style = "yellow"
+
+[fill]
+symbol = " "
+
+[character]
+success_symbol = "[❯](bold #a6e3a1)"
+error_symbol = "[❯](bold #f38ba8)"
+vicmd_symbol = "[❮](bold yellow)"

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+WALL="$1"
+
+if [ -z "$WALL" ]; then
+    echo "Usage: setwall <image>"
+    exit 1
+fi
+
+mkdir -p ~/.cache
+
+awww img "$WALL" \
+    --transition-type grow \
+    --transition-pos 0.5,0.5 \
+    --transition-duration 1
+
+cp "$WALL" ~/.cache/current_wallpaper
+
+magick "$WALL" \
+    -resize 1920x1080^ \
+    -gravity center \
+    -extent 1920x1080 \
+    -blur 0x12 \
+    ~/.cache/current_wallpaper_blur.png
+
+wal -i "$WALL"
+
+
+# Reload Hyprland
+hyprctl reload
+
+# Reload Walker
+touch ~/.config/walker/themes/pywal/style.css
+
+# Reload Waybar
+pkill waybar
+waybar &
+
+# Reload SwayNC
+pkill swaync
+swaync &

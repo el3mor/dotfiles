@@ -1,0 +1,117 @@
+@import "colors.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 14px;
+    min-height: 0;
+    border: none;
+}
+
+window#waybar {
+    background: transparent;
+    color: @foreground;
+    margin-top: 10px;
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background: alpha(@background, 0.65);
+    border: 2px solid alpha(@color4, 0.85);
+    border-radius: 12px;
+    padding: 6px 12px;
+}
+
+#custom-logo,
+#workspaces,
+#idle_inhibitor,
+#language,
+#cpu,
+#memory,
+#network,
+#battery,
+#pulseaudio,
+#mpris,
+#tray,
+#clock,
+#custom-power {
+    padding: 0 10px;
+    margin: 0 4px;
+}
+
+#custom-logo {
+    color: @color4;
+    font-size: 18px;
+}
+
+#workspaces button {
+    color: @foreground;
+    border-radius: 10px;
+    padding: 0 10px;
+    margin: 3px;
+    transition: 250ms;
+}
+
+#workspaces button.active {
+    background: @color4;
+    color: @background;
+}
+
+#workspaces button:hover {
+    background: alpha(@color4, 0.35);
+}
+
+#idle_inhibitor {
+    color: @color6;
+}
+
+#language {
+    color: @color4;
+}
+
+#cpu {
+    color: @color2;
+}
+
+#memory {
+    color: @color3;
+}
+
+#network {
+    color: @color6;
+}
+
+#battery {
+    color: @color2;
+}
+
+#battery.warning {
+    color: @color3;
+}
+
+#battery.critical {
+    color: @color1;
+}
+
+#pulseaudio {
+    color: @color5;
+}
+
+#mpris {
+    color: @color5;
+}
+
+#clock {
+    color: @foreground;
+}
+
+#custom-power {
+    color: @color1;
+    font-size: 16px;
+}
+
+#custom-power:hover {
+    color: alpha(@color1, 0.7);
+}

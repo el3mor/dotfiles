@@ -1,0 +1,117 @@
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 14px;
+    border: none;
+    border-radius: 16px;
+}
+
+.notification-row {
+    outline: none;
+    margin: 8px;
+}
+
+.notification {
+    background: rgba(20, 20, 28, 0.82);
+    border: 2px solid rgba(180, 30, 30, 0.35);
+    border-radius: 18px;
+    padding: 14px;
+    transition: 200ms;
+}
+
+.notification:hover {
+    background: rgba(35, 35, 45, 0.92);
+    border-color: rgba(220, 40, 40, 0.65);
+}
+
+.notification-content {
+    background: transparent;
+}
+
+.summary {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.body {
+    color: #d7d7d7;
+}
+
+.time {
+    color: #888888;
+    font-size: 12px;
+}
+
+.notification-action {
+    background: rgba(120, 25, 25, 0.35);
+    color: white;
+    margin-top: 8px;
+}
+
+.notification-action:hover {
+    background: rgba(180, 35, 35, 0.55);
+}
+
+.control-center {
+    background: rgba(12, 12, 18, 0.88);
+    border-radius: 22px;
+    border: 2px solid rgba(180, 30, 30, 0.35);
+    padding: 16px;
+}
+
+.control-center .notification {
+    margin: 10px 0;
+}
+
+.widget-title {
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.widget-title button {
+    background: rgba(140, 30, 30, 0.35);
+    color: white;
+    padding: 6px 12px;
+}
+
+.widget-title button:hover {
+    background: rgba(200, 35, 35, 0.55);
+}
+
+.widget-dnd {
+    color: white;
+    margin-bottom: 12px;
+}
+
+.widget-dnd switch {
+    background: rgba(70,70,70,.5);
+}
+
+.widget-dnd switch:checked {
+    background: #c62828;
+}
+
+.widget-mpris {
+    background: rgba(35,35,45,.75);
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.widget-mpris-player {
+    border-radius: 14px;
+}
+
+.widget-mpris-title {
+    color: white;
+    font-weight: bold;
+}
+
+.widget-mpris-subtitle {
+    color: #bbbbbb;
+}
+
+.notification-group-header {
+    color: #d44;
+    font-weight: bold;
+}

@@ -1,0 +1,10 @@
+elephant-clipboard
+elephant-desktopapplications
+elephant-providerlist
+grimblast-git
+python-pywalfox
+walker-bin
+wlogout-git
+yay
+yay-debug
+zen-browser-bin
