@@ -4,20 +4,10 @@ set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-#######################################
-# Update
-#######################################
-
 echo "==> Updating system..."
-
 sudo pacman -Syu --noconfirm
 
-#######################################
-# Base packages
-#######################################
-
-echo "==> Installing base packages..."
-
+echo "==> Installing required packages..."
 sudo pacman -S --needed --noconfirm \
     git \
     base-devel \
@@ -27,18 +17,7 @@ sudo pacman -S --needed --noconfirm \
     curl
 
 #######################################
-# PATH
-#######################################
-
-mkdir -p "$HOME/.local/bin"
-
-grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.zprofile" 2>/dev/null || \
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zprofile"
-
-export PATH="$HOME/.local/bin:$PATH"
-
-#######################################
-# yay
+# Install yay
 #######################################
 
 if ! command -v yay >/dev/null 2>&1; then
@@ -49,7 +28,6 @@ if ! command -v yay >/dev/null 2>&1; then
     git clone https://aur.archlinux.org/yay.git /tmp/yay
 
     cd /tmp/yay
-
     makepkg -si --noconfirm
 
     cd "$REPO_DIR"
@@ -58,17 +36,16 @@ if ! command -v yay >/dev/null 2>&1; then
 fi
 
 #######################################
-# Pywal
+# Install Pywal
 #######################################
 
-echo "==> Installing pywal..."
-
-pipx install pywal || pipx upgrade pywal
-
-export PATH="$HOME/.local/bin:$PATH"
+if ! command -v wal >/dev/null 2>&1; then
+    echo "==> Installing pywal..."
+    pipx install pywal
+fi
 
 #######################################
-# Native Packages
+# Native packages
 #######################################
 
 echo "==> Installing native packages..."
@@ -79,7 +56,7 @@ while read -r pkg; do
 done < "$REPO_DIR/packages/native.txt"
 
 #######################################
-# AUR Packages
+# AUR packages
 #######################################
 
 echo "==> Installing AUR packages..."
@@ -94,27 +71,22 @@ done < "$REPO_DIR/packages/aur.txt"
 #######################################
 
 if [ -d "$REPO_DIR/fonts" ]; then
-
     echo "==> Installing fonts..."
 
     mkdir -p ~/.local/share/fonts
-
-    cp "$REPO_DIR"/fonts/* ~/.local/share/fonts/
+    cp -f "$REPO_DIR"/fonts/* ~/.local/share/fonts/
 
     fc-cache -fv
-
 fi
 
 #######################################
-# SDDM Astronaut
+# SDDM Astronaut Theme
 #######################################
 
-if [ ! -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
-
+if ! [ -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
     echo "==> Installing SDDM Astronaut Theme..."
 
-    sudo git clone \
-        --depth 1 \
+    sudo git clone --depth 1 \
         https://github.com/Keyitdev/sddm-astronaut-theme.git \
         /usr/share/sddm/themes/sddm-astronaut-theme
 
@@ -123,7 +95,6 @@ if [ ! -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
         /usr/share/fonts/
 
     sudo fc-cache -fv
-
 fi
 
 echo "[Theme]
@@ -133,43 +104,46 @@ Current=sddm-astronaut-theme" | sudo tee /etc/sddm.conf >/dev/null
 # Oh My Zsh
 #######################################
 
+echo "==> Installing Oh My Zsh..."
+
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
-
-RUNZSH=no CHSH=no \
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
+    RUNZSH=no CHSH=no \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
 #######################################
-# Zsh Plugins
+# Zsh plugins
 #######################################
 
+echo "==> Installing zsh plugins..."
+
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-
-git clone \
-https://github.com/zsh-users/zsh-autosuggestions \
-"$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-
+    git clone \
+        https://github.com/zsh-users/zsh-autosuggestions \
+        "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
 fi
 
 if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    git clone \
+        https://github.com/zsh-users/zsh-syntax-highlighting \
+        "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+fi
 
-git clone \
-https://github.com/zsh-users/zsh-syntax-highlighting \
-"$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autocomplete" ]; then
+    git clone \
+        https://github.com/marlonrichert/zsh-autocomplete.git \
+        "$ZSH_CUSTOM/plugins/zsh-autocomplete"
 fi
 
 #######################################
-# Default Shell
+# Default shell
 #######################################
 
 if [ "$SHELL" != "$(command -v zsh)" ]; then
-
+    echo "==> Setting zsh as default shell..."
     chsh -s "$(command -v zsh)"
-
 fi
 
 #######################################
@@ -181,7 +155,6 @@ echo "==> Installing dotfiles..."
 cd "$REPO_DIR"
 
 for dir in */; do
-
     case "$dir" in
         .git/|packages/|fonts/|wallpapers/)
             continue
@@ -189,62 +162,81 @@ for dir in */; do
     esac
 
     stow --restow "${dir%/}"
-
 done
-
-#######################################
-# Kitty
-#######################################
-
-mkdir -p ~/.config/kitty
-
-touch ~/.config/kitty/kitty.conf
-
-grep -q "^shell /usr/bin/zsh$" ~/.config/kitty/kitty.conf || \
-echo "shell /usr/bin/zsh" >> ~/.config/kitty/kitty.conf
-
-grep -q "^allow_remote_control yes$" ~/.config/kitty/kitty.conf || \
-echo "allow_remote_control yes" >> ~/.config/kitty/kitty.conf
 
 #######################################
 # Scripts
 #######################################
 
+echo "==> Installing scripts..."
+
+mkdir -p ~/.local/bin
+
 chmod +x "$REPO_DIR"/bin/.local/bin/*
 
+for script in "$REPO_DIR"/bin/.local/bin/*; do
+    ln -sf "$script" ~/.local/bin/"$(basename "$script")"
+done
+
 #######################################
-# Wallpaper
+# PATH
 #######################################
 
-if [ -f "$REPO_DIR/wallpapers/obito-wallpaper.png" ]; then
+if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+fi
 
-    echo "==> Generating Pywal colors..."
+export PATH="$HOME/.local/bin:$PATH"
 
-    "$REPO_DIR/bin/.local/bin/setwall" \
-        "$REPO_DIR/wallpapers/obito-wallpaper.png"
+#######################################
+# Kitty
+#######################################
 
-    mkdir -p ~/.config/waybar
+echo "==> Configuring kitty..."
 
-    ln -sf \
-        ~/.cache/wal/colors-waybar.css \
-        ~/.config/waybar/colors.css
+mkdir -p ~/.config/kitty
 
+touch ~/.config/kitty/kitty.conf
+
+if ! grep -q "shell /usr/bin/zsh" ~/.config/kitty/kitty.conf; then
+    echo "shell /usr/bin/zsh" >> ~/.config/kitty/kitty.conf
 fi
 
 #######################################
-# Services
+# Waybar Pywal
 #######################################
 
-sudo systemctl enable NetworkManager.service || true
-sudo systemctl enable sddm.service || true
+mkdir -p ~/.config/waybar
+
+ln -sf \
+    ~/.cache/wal/colors-waybar.css \
+    ~/.config/waybar/colors.css
+
+#######################################
+# Default wallpaper
+#######################################
+
+if [ -f "$REPO_DIR/wallpapers/obito-wallpaper.png" ]; then
+    echo "==> Applying wallpaper..."
+
+    ~/.local/bin/setwall \
+        "$REPO_DIR/wallpapers/obito-wallpaper.png"
+fi
+
+#######################################
+# Enable services
+#######################################
+
+sudo systemctl enable sddm.service
+sudo systemctl enable NetworkManager.service
 
 #######################################
 # Done
 #######################################
 
 echo
-echo "=========================================="
+echo "======================================="
 echo " Installation completed successfully!"
-echo "=========================================="
+echo "======================================="
 echo
-echo "Please reboot your system."
+echo "Reboot the system."
